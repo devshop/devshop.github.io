@@ -79,17 +79,32 @@
         padding: 20px;
         border-radius: 10px;
       }
+
+      #results {
+        max-width: 100%;
+        height: auto;
+      }
+
+      #results img {
+        width: 600px; /*width of parent container*/
+        height: 350px; /*height of parent container*/
+        object-fit: contain;
+        position: relative;
+        top: 50%;
+        transform: translateY(-50%);
+      }
     </style>
   </head>
   <body>
     <!-- <input type="file" accept="image/*" capture="camera"> -->
     <video id="vid" playsinline="true"></video>
     <div id="overlay">
-      <div class="title"><div>FRONT OF DRIVER LICENSE</div></div>
+      <div id="title" class="title"><div>FRONT OF DRIVER LICENSE</div></div>
       <div id="crop" class="bounds">
         <div id="rotate-device">Please Rotate Your Device</div>
       </div>
       <button id="upload" class="btn"><div>Upload</div></button>
+      <div id="results"></div>
     </div>
     <script>
       console.log(
@@ -123,25 +138,9 @@
               var cropRect = crop.getBoundingClientRect();
               canvas.width = vid.width;
               canvas.height = vid.height;
-
-              console.log("cropRect", cropRect);
-              console.log("videoRect", videoRect);
               var widthScale = videoRect.width / cropRect.width;
               var heightScale = videoRect.height / cropRect.height;
-
-              canvas
-                .getContext("2d")
-                .drawImage(
-                  vid,
-                  cropRect.x * widthScale,
-                  cropRect.y * heightScale,
-                  cropRect.width * widthScale,
-                  cropRect.height * heightScale,
-                  0,
-                  0,
-                  cropRect.width * widthScale,
-                  cropRect.height * heightScale
-                );
+              canvas.getContext("2d").drawImage(vid, 0, 0);
               canvas.toBlob(doWhatYouWantWithTheCapturedImage);
             };
           })
@@ -158,13 +157,14 @@
         };
         img.src = url;
         URL.revokeObjectURL(vid.src);
-        overlay.parentNode.appendChild(img);
+        results.appendChild(img);
         vid.parentNode.removeChild(vid);
-        overlay.parentNode.removeChild(overlay);
+        crop.parentNode.removeChild(crop);
+        upload.parentNode.removeChild(upload);
+        title.innerHTML = "Captured Image (Reload to try again)";
       }
 
       function checkOrientationChange() {
-        console.log(window.matchMedia("(orientation: portrait)"));
         if (window.matchMedia("(orientation: portrait)").matches) {
           document.getElementById("rotate-device").style.display = "block";
         } else {
