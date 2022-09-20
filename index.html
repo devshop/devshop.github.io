@@ -68,11 +68,11 @@
         max-width: 1011px;
         width: 60%;
         aspect-ratio: 4 / 3;
-        box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.8);
+        box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.6);
       }
 
       #rotate-device {
-        background-color: rgba(0, 0, 0, 0.8);
+        background-color: rgba(0, 0, 0, 0.6);
         color: #fff;
         font-size: medium;
         text-align: center;
@@ -112,30 +112,37 @@
           })
           .then(function (stream) {
             vid.onloadedmetadata = function () {
-              this.width = this.videoWidth;
-              this.height = this.videoHeight;
+              vid.width = this.videoWidth;
+              vid.height = this.videoHeight;
             };
             vid.srcObject = stream;
             vid.play();
             upload.onclick = function () {
-              var c = document.createElement("canvas");
-              var cropBox = document.getElementById("crop");
-              var position = cropBox.getBoundingClientRect();
-              console.log("position", position);
-              c.width = position.width;
-              c.height = position.height;
-              c.getContext("2d").drawImage(
-                vid,
-                position.x,
-                position.y,
-                position.width,
-                position.height,
-                0,
-                0,
-                position.width,
-                position.height
-              );
-              c.toBlob(doWhatYouWantWithTheCapturedImage);
+              var canvas = document.createElement("canvas");
+              var videoRect = vid.getBoundingClientRect();
+              var cropRect = crop.getBoundingClientRect();
+              canvas.width = vid.width;
+              canvas.height = vid.height;
+
+              console.log("cropRect", cropRect);
+              console.log("videoRect", videoRect);
+              var widthScale = videoRect.width / cropRect.width;
+              var heightScale = videoRect.height / cropRect.height;
+
+              canvas
+                .getContext("2d")
+                .drawImage(
+                  vid,
+                  cropRect.x * widthScale,
+                  cropRect.y * heightScale,
+                  cropRect.width * widthScale,
+                  cropRect.height * heightScale,
+                  0,
+                  0,
+                  cropRect.width * widthScale,
+                  cropRect.height * heightScale
+                );
+              canvas.toBlob(doWhatYouWantWithTheCapturedImage);
             };
           })
           .catch(function (err) {
